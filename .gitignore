@@ -1,0 +1,17 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+*.test
+*.tmp
+
+*.out
+
+.vscode
+.DS_Store
+.idea
+
+vendor/
+/Godeps/
