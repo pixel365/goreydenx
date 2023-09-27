@@ -87,19 +87,20 @@ type Parameters struct {
 }
 
 type Order struct {
-	ContentType      string     `json:"content_type"`
-	Platform         string     `json:"platform"`
-	Uuid             string     `json:"uuid"`
-	Status           string     `json:"status"`
-	UpdatedAt        string     `json:"updated_at"`
-	CreatedAt        string     `json:"created_at"`
-	Parameters       Parameters `json:"parameters,omitempty"`
-	PricePerView     float64    `json:"price_per_view"`
-	Statistics       Statistics `json:"statistics,omitempty"`
-	OrderedViewQty   uint32     `json:"ordered_view_qty"`
-	OnlineUsersLimit uint32     `json:"online_users_limit"`
-	Id               uint32     `json:"id"`
-	IsAutostart      bool       `json:"is_autostart"`
+	Platform                    string     `json:"platform"`
+	Uuid                        string     `json:"uuid"`
+	Status                      string     `json:"status"`
+	UpdatedAt                   string     `json:"updated_at"`
+	CreatedAt                   string     `json:"created_at"`
+	ContentType                 string     `json:"content_type"`
+	ContentClassificationLabels []string   `json:"content_classification_labels,omitempty"`
+	Parameters                  Parameters `json:"parameters,omitempty"`
+	PricePerView                float64    `json:"price_per_view"`
+	Statistics                  Statistics `json:"statistics,omitempty"`
+	OrderedViewQty              uint32     `json:"ordered_view_qty"`
+	OnlineUsersLimit            uint32     `json:"online_users_limit"`
+	Id                          uint32     `json:"id"`
+	IsAutostart                 bool       `json:"is_autostart"`
 }
 
 type Payment struct {
