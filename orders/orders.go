@@ -4,30 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	rx "github.com/pixel365/goreydenx"
+	h "github.com/pixel365/goreydenx/helpers"
 	m "github.com/pixel365/goreydenx/model"
-	"io"
 )
-
-func get[T any](c *rx.Client, path string) (*m.Result[T], error) {
-	res, err := c.Get(path)
-	if err != nil {
-		return nil, err
-	}
-	result := m.Result[T]{}
-	err = c.JSONDecoder(res, &result)
-	return &result, err
-}
-
-func post[T any](c *rx.Client, path string, payload io.Reader) (*m.Result[T], error) {
-	res, err := c.Post(path, payload)
-	if err != nil {
-		return nil, err
-	}
-
-	result := m.Result[T]{}
-	err = c.JSONDecoder(res, &result)
-	return &result, err
-}
 
 // All orders
 // See https://api.reyden-x.com/docs#/default/orders_v1_orders__get
@@ -36,13 +15,13 @@ func Orders(c *rx.Client, cursor string) (*m.Result[[]m.Order], error) {
 	if len(cursor) > 0 {
 		path = fmt.Sprintf("/orders/?cursor=%s", cursor)
 	}
-	return get[[]m.Order](c, path)
+	return h.Get[[]m.Order](c, path)
 }
 
 // Order details
 // See https://api.reyden-x.com/docs#/default/order_details_v1_orders__order_id___get
 func Details(c *rx.Client, orderId uint32) (*m.Result[m.Order], error) {
-	return get[m.Order](c, fmt.Sprintf("/orders/%d/", orderId))
+	return h.Get[m.Order](c, fmt.Sprintf("/orders/%d/", orderId))
 }
 
 // Order payments
@@ -52,31 +31,31 @@ func Payments(c *rx.Client, orderId uint32, cursor string) (*m.Result[[]m.Paymen
 	if len(cursor) > 0 {
 		path = fmt.Sprintf("/orders/%d/payments/?cursor=%s", orderId, cursor)
 	}
-	return get[[]m.Payment](c, path)
+	return h.Get[[]m.Payment](c, path)
 }
 
 // Detailed information about users online
 // See https://api.reyden-x.com/docs#/default/order_stats_online_v1_orders__order_id__statistics_online__get
 func OnlineStats(c *rx.Client, orderId uint32) (*m.Result[[]m.OnlineStats], error) {
-	return get[[]m.OnlineStats](c, fmt.Sprintf("/orders/%d/statistics/online/", orderId))
+	return h.Get[[]m.OnlineStats](c, fmt.Sprintf("/orders/%d/statistics/online/", orderId))
 }
 
 // Detailed information about clicks
 // See https://api.reyden-x.com/docs#/default/order_stats_clicks_v1_orders__order_id__statistics_clicks__get
 func ClicksStats(c *rx.Client, orderId uint32) (*m.Result[[]m.DateQuantity], error) {
-	return get[[]m.DateQuantity](c, fmt.Sprintf("/orders/%d/statistics/clicks/", orderId))
+	return h.Get[[]m.DateQuantity](c, fmt.Sprintf("/orders/%d/statistics/clicks/", orderId))
 }
 
 // Detailed information about views
 // See https://api.reyden-x.com/docs#/default/order_stats_views_v1_orders__order_id__statistics_views__get
 func ViewsStats(c *rx.Client, orderId uint32) (*m.Result[[]m.DateQuantity], error) {
-	return get[[]m.DateQuantity](c, fmt.Sprintf("/orders/%d/statistics/views/", orderId))
+	return h.Get[[]m.DateQuantity](c, fmt.Sprintf("/orders/%d/statistics/views/", orderId))
 }
 
 // Detailed information about sites
 // See https://api.reyden-x.com/docs#/default/order_stats_sites_v1_orders__order_id__statistics_sites__get
 func SitesStats(c *rx.Client, orderId uint32) (*m.Result[[]m.SiteStats], error) {
-	return get[[]m.SiteStats](c, fmt.Sprintf("/orders/%d/statistics/views/", orderId))
+	return h.Get[[]m.SiteStats](c, fmt.Sprintf("/orders/%d/statistics/views/", orderId))
 }
 
 // View statistics for multiple orders
@@ -86,7 +65,7 @@ func MultipleViewsStats(c *rx.Client, identifiers m.Identifiers) (*m.Result[[]m.
 	if err != nil {
 		return nil, err
 	}
-	return post[[]m.IdQuantity](c, "/orders/multiple/views/", bytes.NewBuffer(payload))
+	return h.Post[[]m.IdQuantity](c, "/orders/multiple/views/", bytes.NewBuffer(payload))
 }
 
 // Click-through statistics for multiple orders
@@ -96,7 +75,7 @@ func MultipleClicksStats(c *rx.Client, identifiers m.Identifiers) (*m.Result[[]m
 	if err != nil {
 		return nil, err
 	}
-	return post[[]m.IdQuantity](c, "/orders/multiple/clicks/", bytes.NewBuffer(payload))
+	return h.Post[[]m.IdQuantity](c, "/orders/multiple/clicks/", bytes.NewBuffer(payload))
 }
 
 // Create new order for Twitch or Youtube stream

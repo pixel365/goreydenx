@@ -201,3 +201,8 @@ func (o *YouTubeParams) IsValid() (bool, error) {
 func (o *YouTubeParams) PlatformCode() string {
 	return rx.Twitch
 }
+
+type Traffic struct {
+	Code     string `json:"code"`
+	Quantity uint32 `json:"quantity"`
+}
