@@ -17,3 +17,9 @@ func Countries(c *rx.Client) (*m.Result[[]m.Traffic], error) {
 func Languages(c *rx.Client) (*m.Result[[]m.Traffic], error) {
 	return h.Get[[]m.Traffic](c, "/traffic/languages/")
 }
+
+// Devices Traffic statistics by device type
+// See https://api.reyden-x.com/docs#/Traffic/Traffic_statistics_by_device_type_v1_traffic_devices__get
+func Devices(c *rx.Client) (*m.Result[[]m.Traffic], error) {
+	return h.Get[[]m.Traffic](c, "/traffic/devices/")
+}

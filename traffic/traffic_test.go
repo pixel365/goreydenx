@@ -2,10 +2,11 @@ package traffic
 
 import (
 	"bytes"
-	rx "github.com/pixel365/goreydenx"
 	"io"
 	"net/http"
 	"testing"
+
+	rx "github.com/pixel365/goreydenx"
 )
 
 type RoundTripFunc func(req *http.Request) *http.Response
@@ -51,6 +52,27 @@ func TestLanguages(t *testing.T) {
 	}
 
 	_, err := Languages(client)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDevices(t *testing.T) {
+	data := "{\"request_id\":\"XntHUXu9npR6KQUt-sVXGQ1706619012.52129\",\"cached\":false,\"cache_expires_at\":\"2024-01-30T18:50:13.549227+00:00\",\"result\":[{\"code\":\"desktop\",\"quantity\":1375379},{\"code\":\"mobile\",\"quantity\":1883065},{\"code\":\"tablet\",\"quantity\":35829}]}"
+	client := rx.NewClient("", "")
+	client.Transport = RoundTripFunc(func(req *http.Request) *http.Response {
+		return &http.Response{
+			StatusCode: 200,
+			Body:       io.NopCloser(bytes.NewBufferString(data)),
+			Header:     make(http.Header),
+		}
+	})
+	client.Token = &rx.Token{
+		AccessToken: "fake token",
+		ExpiresIn:   "fake date",
+	}
+
+	_, err := Devices(client)
 	if err != nil {
 		t.Error(err)
 	}
