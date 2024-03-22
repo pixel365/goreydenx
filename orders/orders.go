@@ -55,7 +55,7 @@ func ViewsStats(c *rx.Client, orderId uint32) (*m.Result[[]m.DateQuantity], erro
 // SitesStats Detailed information about sites
 // See https://api.reyden-x.com/docs#/Orders/order_stats_sites_v1_orders__order_id__statistics_sites__get
 func SitesStats(c *rx.Client, orderId uint32) (*m.Result[[]m.SiteStats], error) {
-	return h.Get[[]m.SiteStats](c, fmt.Sprintf("/orders/%d/statistics/views/", orderId))
+	return h.Get[[]m.SiteStats](c, fmt.Sprintf("/orders/%d/statistics/sites/", orderId))
 }
 
 // MultipleViewsStats View statistics for multiple orders
