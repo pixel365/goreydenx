@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+
 	rx "github.com/pixel365/goreydenx"
 )
 
@@ -199,7 +200,7 @@ func (o *YouTubeParams) IsValid() (bool, error) {
 }
 
 func (o *YouTubeParams) PlatformCode() string {
-	return rx.Twitch
+	return rx.YouTube
 }
 
 type Traffic struct {
