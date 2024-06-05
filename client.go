@@ -2,12 +2,14 @@ package goreydenx
 
 import (
 	"errors"
-	"github.com/bytedance/sonic"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/bytedance/sonic"
+	"github.com/golang-module/carbon"
 )
 
 type JSONMarshal func(v interface{}) ([]byte, error)
@@ -16,11 +18,16 @@ type JSONUnmarshal func(data []byte, v interface{}) error
 type Token struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   string `json:"expires_in"`
+	TokenType   string `json:"token_type,omitempty"`
 }
 
 func (t *Token) IsValid() bool {
-	//TODO implements
-	return t.AccessToken != ""
+	if t.AccessToken == "" || t.ExpiresIn == "" {
+		return false
+	}
+
+	now := carbon.Now(carbon.UTC)
+	return carbon.Parse(t.ExpiresIn, carbon.UTC).Compare(">=", now)
 }
 
 type Client struct {
@@ -129,7 +136,7 @@ func (c *Client) Patch(path string, payload io.Reader) ([]byte, error) {
 	return request(c, http.MethodPatch, path, payload)
 }
 
-// Make new Client instance
+// NewClient Make Client instance
 func NewClient(userName string, password string) *Client {
 	return &Client{
 		Client: &http.Client{
@@ -140,5 +147,18 @@ func NewClient(userName string, password string) *Client {
 		BaseUrl:     BaseUrl,
 		userName:    userName,
 		password:    password,
+	}
+}
+
+// NewClientWithToken Make Client instance
+func NewClientWithToken(token *Token) *Client {
+	return &Client{
+		Client: &http.Client{
+			Timeout: time.Second * 5,
+		},
+		JSONEncoder: sonic.Marshal,
+		JSONDecoder: sonic.Unmarshal,
+		BaseUrl:     BaseUrl,
+		Token:       token,
 	}
 }

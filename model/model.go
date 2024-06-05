@@ -100,6 +100,7 @@ type Order struct {
 	Statistics                  Statistics `json:"statistics,omitempty"`
 	OrderedViewQty              uint32     `json:"ordered_view_qty"`
 	OnlineUsersLimit            uint32     `json:"online_users_limit"`
+	PriceId                     uint32     `json:"tariff_id"`
 	Id                          uint32     `json:"id"`
 	IsAutostart                 bool       `json:"is_autostart"`
 }
