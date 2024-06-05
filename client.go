@@ -41,7 +41,10 @@ type Client struct {
 }
 
 func (c *Client) isAuthenticated() bool {
-	return c.Token != nil && c.Token.IsValid()
+	if c.Token == nil {
+		return false
+	}
+	return c.Token.IsValid()
 }
 
 func (c *Client) Auth() *Client {
