@@ -71,24 +71,25 @@ func (c *Client) Auth() *Client {
 		}
 	} else {
 		if !c.Token.IsValid() {
-			c.refreshToken()
+			token, _ := c.RefreshToken()
+			c.Token = token
 		}
 	}
 
 	return c
 }
 
-func (c *Client) refreshToken() {
+func (c *Client) RefreshToken() (*Token, error) {
 	resp, err := request(c, http.MethodPatch, "/token/refresh/", nil)
-	if err != nil {
-		t := Token{}
-		err := c.JSONDecoder(resp, &t)
-		if err == nil {
-			c.Token = &t
+	if err == nil {
+		token := Token{}
+		if decodeError := c.JSONDecoder(resp, &token); decodeError != nil {
+			return nil, decodeError
 		}
-	} else {
-		c.Token = nil
+		return &token, nil
 	}
+
+	return nil, err
 }
 
 func request(client *Client, method string, path string, payload io.Reader) ([]byte, error) {
