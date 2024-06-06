@@ -51,7 +51,7 @@ type Balance struct {
 	Currency        string  `json:"currency"`
 	FormattedAmount float64 `json:"formatted_amount"`
 	Id              uint32  `json:"id"`
-	Amount          uint32  `json:"amount"`
+	Amount          float64 `json:"amount"`
 	CurrencyId      uint32  `json:"currency_id"`
 }
 
