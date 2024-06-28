@@ -2,7 +2,9 @@ package prices
 
 import (
 	"fmt"
+
 	rx "github.com/pixel365/goreydenx"
+	h "github.com/pixel365/goreydenx/helpers"
 	m "github.com/pixel365/goreydenx/model"
 )
 
@@ -45,4 +47,10 @@ func GoodGame(c *rx.Client) (*m.Result[[]m.Price], error) {
 // See https://api.reyden-x.com/docs#/Prices/prices_v1_prices__platform_code___get
 func VkPlay(c *rx.Client) (*m.Result[[]m.Price], error) {
 	return request(c, rx.VkPlay)
+}
+
+// Categories All price categories
+// See https://api.reyden-x.com/docs#/Price%20Categories/categories_v1_price_categories__get
+func Categories(c *rx.Client) (*m.Result[[]m.PriceCategory], error) {
+	return h.Get[[]m.PriceCategory](c, "/price-categories/")
 }

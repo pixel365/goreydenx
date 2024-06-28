@@ -50,8 +50,8 @@ type User struct {
 type Balance struct {
 	Currency        string  `json:"currency"`
 	FormattedAmount float64 `json:"formatted_amount"`
-	Id              uint32  `json:"id"`
 	Amount          float64 `json:"amount"`
+	Id              uint32  `json:"id"`
 	CurrencyId      uint32  `json:"currency_id"`
 }
 
@@ -69,6 +69,14 @@ type Price struct {
 	Views         MinMaxStep `json:"views"`
 	OnlineViewers MinMaxStep `json:"online_viewers"`
 	Id            uint32     `json:"id"`
+	CategoryId    uint32     `json:"category_id"`
+}
+
+type PriceCategory struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Id          uint32 `json:"id"`
+	IsActive    bool   `json:"is_active"`
 }
 
 type Statistics struct {
