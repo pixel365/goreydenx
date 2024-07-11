@@ -216,3 +216,22 @@ type Traffic struct {
 	Code     string `json:"code"`
 	Quantity uint32 `json:"quantity"`
 }
+
+type LaunchParameters struct {
+	LaunchMode string `json:"mode"`
+	DelayTime  uint32 `json:"delay_time"`
+}
+
+func (o *LaunchParameters) IsValid() (bool, error) {
+	switch o.LaunchMode {
+	case rx.LaunchModeAuto, rx.LaunchModeManual:
+		return true, nil
+	case rx.LaunchModeDelay:
+		if o.DelayTime < 5 || o.DelayTime > 240 {
+			return false, errors.New("the number of minutes for delayed start should be from 5 to 240")
+		}
+		return true, nil
+	default:
+		return false, errors.New("invalid launch mode")
+	}
+}

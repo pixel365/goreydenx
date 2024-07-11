@@ -1,7 +1,9 @@
 package action
 
 import (
+	"bytes"
 	"fmt"
+
 	rx "github.com/pixel365/goreydenx"
 	m "github.com/pixel365/goreydenx/model"
 )
@@ -78,4 +80,27 @@ func IncreaseOff(c *rx.Client, orderId uint32) (*m.ActionResult, error) {
 // See https://api.reyden-x.com/docs#/Orders/add_views_v1_orders__order_id__action_add_views__value___patch
 func AddViews(c *rx.Client, orderId uint32, value uint32) (*m.ActionResult, error) {
 	return request(c, fmt.Sprintf("/orders/%d/action/add/views/%d/", orderId, value))
+}
+
+// ChangeLaunchMode Change order launch parameters
+// See https://api.reyden-x.com/docs#/Orders/change_launch_params_v1_orders__order_id__action_change_launch__patch
+func ChangeLaunchMode(c *rx.Client, orderId uint32, params *m.LaunchParameters) (*m.ActionResult, error) {
+	valid, err := params.IsValid()
+	if !valid {
+		return nil, err
+	}
+
+	payload, err := c.JSONEncoder(params)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.Patch(fmt.Sprintf("/orders/%d/action/change/launch/", orderId), bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, err
+	}
+
+	result := m.ActionResult{}
+	err = c.JSONDecoder(res, &result)
+	return &result, err
 }

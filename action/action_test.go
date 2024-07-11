@@ -2,10 +2,12 @@ package action
 
 import (
 	"bytes"
-	rx "github.com/pixel365/goreydenx"
 	"io"
 	"net/http"
 	"testing"
+
+	rx "github.com/pixel365/goreydenx"
+	m "github.com/pixel365/goreydenx/model"
 )
 
 type RoundTripFunc func(req *http.Request) *http.Response
@@ -65,6 +67,15 @@ func TestActions(t *testing.T) {
 	}
 
 	_, err = AddViews(client, 123, 100)
+	if err != nil {
+		t.Error(err)
+	}
+
+	launchParameters := &m.LaunchParameters{
+		LaunchMode: rx.LaunchModeDelay,
+		DelayTime:  10,
+	}
+	_, err = ChangeLaunchMode(client, 123, launchParameters)
 	if err != nil {
 		t.Error(err)
 	}
