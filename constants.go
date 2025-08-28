@@ -1,15 +1,19 @@
 package goreydenx
 
+type PlatformCode string
+type LaunchMode string
+
 const (
 	BaseUrl = "https://api.reyden-x.com/v1"
 
-	Twitch   = "twitch"
-	YouTube  = "youtube"
-	GoodGame = "goodgame"
-	Trovo    = "trovo"
-	VkPlay   = "vkplay"
+	Twitch   PlatformCode = "twitch"
+	YouTube  PlatformCode = "youtube"
+	GoodGame PlatformCode = "goodgame"
+	Trovo    PlatformCode = "trovo"
+	VkPlay   PlatformCode = "vkplay"
+	Kick     PlatformCode = "kick"
 
-	LaunchModeAuto   = "auto"
-	LaunchModeDelay  = "delay"
-	LaunchModeManual = "manual"
+	LaunchModeAuto   LaunchMode = "auto"
+	LaunchModeDelay  LaunchMode = "delay"
+	LaunchModeManual LaunchMode = "manual"
 )

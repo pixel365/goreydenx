@@ -157,59 +157,19 @@ type SmoothGain struct {
 }
 
 type BaseOrderParams struct {
-	LaunchMode      string     `json:"launch_mode"`
-	SmoothGain      SmoothGain `json:"smooth_gain"`
-	PriceId         uint32     `json:"price_id"`
-	NumberOfViews   uint32     `json:"number_of_views"`
-	NumberOfViewers uint32     `json:"number_of_viewers"`
-	DelayTime       uint32     `json:"delay_time"`
+	LaunchMode      rx.LaunchMode `json:"launch_mode"`
+	SmoothGain      SmoothGain    `json:"smooth_gain"`
+	PriceId         uint32        `json:"price_id"`
+	NumberOfViews   uint32        `json:"number_of_views"`
+	NumberOfViewers uint32        `json:"number_of_viewers"`
+	DelayTime       uint32        `json:"delay_time"`
+	FixedAllocation int           `json:"fixed_allocation"`
+	NoOverflow      bool          `json:"no_overflow"`
 }
 
 type OrderParams interface {
 	IsValid() (bool, error)
-	PlatformCode() string
-}
-
-type TwitchParams struct {
-	BaseOrderParams
-	TwitchId uint32 `json:"twitch_id"`
-}
-
-func (o *TwitchParams) IsValid() (bool, error) {
-	if o.TwitchId < 1 {
-		return false, errors.New("twitch id must be greater than zero")
-	}
-	switch o.LaunchMode {
-	case rx.LaunchModeAuto, rx.LaunchModeDelay, rx.LaunchModeManual:
-		return true, nil
-	default:
-		return false, errors.New("invalid launch mode")
-	}
-}
-
-func (o *TwitchParams) PlatformCode() string {
-	return rx.Twitch
-}
-
-type YouTubeParams struct {
-	ChannelUrl string `json:"channel_url"`
-	BaseOrderParams
-}
-
-func (o *YouTubeParams) IsValid() (bool, error) {
-	if len(o.ChannelUrl) == 0 {
-		return false, errors.New("invalid channel url")
-	}
-	switch o.LaunchMode {
-	case rx.LaunchModeAuto, rx.LaunchModeDelay, rx.LaunchModeManual:
-		return true, nil
-	default:
-		return false, errors.New("invalid launch mode")
-	}
-}
-
-func (o *YouTubeParams) PlatformCode() string {
-	return rx.YouTube
+	PlatformCode() rx.PlatformCode
 }
 
 type Traffic struct {
@@ -218,8 +178,8 @@ type Traffic struct {
 }
 
 type LaunchParameters struct {
-	LaunchMode string `json:"mode"`
-	DelayTime  uint32 `json:"delay_time"`
+	LaunchMode rx.LaunchMode `json:"mode"`
+	DelayTime  uint32        `json:"delay_time"`
 }
 
 func (o *LaunchParameters) IsValid() (bool, error) {
@@ -228,7 +188,9 @@ func (o *LaunchParameters) IsValid() (bool, error) {
 		return true, nil
 	case rx.LaunchModeDelay:
 		if o.DelayTime < 5 || o.DelayTime > 240 {
-			return false, errors.New("the number of minutes for delayed start should be from 5 to 240")
+			return false, errors.New(
+				"the number of minutes for delayed start should be from 5 to 240",
+			)
 		}
 		return true, nil
 	default:

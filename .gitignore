@@ -1,17 +1,19 @@
+.idea/
+.vscode/
+
+.DS_Store
+
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
 *.test
 *.tmp
-
 *.out
-
-.vscode
-.DS_Store
-.idea
+*.log
+*.txt
+.env
 
 vendor/
-/Godeps/
+bin/

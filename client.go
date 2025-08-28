@@ -1,6 +1,8 @@
 package goreydenx
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -8,12 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/golang-module/carbon"
 )
-
-type JSONMarshal func(v interface{}) ([]byte, error)
-type JSONUnmarshal func(data []byte, v interface{}) error
 
 type Token struct {
 	AccessToken string `json:"access_token"`
@@ -30,14 +28,18 @@ func (t *Token) IsValid() bool {
 	return carbon.Parse(t.ExpiresIn, carbon.UTC).Compare(">=", now)
 }
 
+type RxClient interface {
+	Get(string) ([]byte, error)
+	Post(string, io.Reader) ([]byte, error)
+	Patch(string, io.Reader) ([]byte, error)
+}
+
 type Client struct {
 	*http.Client
-	JSONEncoder JSONMarshal
-	JSONDecoder JSONUnmarshal
-	Token       *Token
-	BaseUrl     string
-	userName    string
-	password    string
+	Token    *Token
+	BaseUrl  string
+	userName string
+	password string
 }
 
 func (c *Client) isAuthenticated() bool {
@@ -52,28 +54,42 @@ func (c *Client) Auth() *Client {
 		return c
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	if c.Token == nil {
 		form := url.Values{}
 		form.Add("username", c.userName)
 		form.Add("password", c.password)
-		req, _ := http.NewRequest(http.MethodPost, c.BaseUrl+"/token/", strings.NewReader(form.Encode()))
+		req, _ := http.NewRequestWithContext(
+			ctx,
+			http.MethodPost,
+			c.BaseUrl+"/token/",
+			strings.NewReader(form.Encode()),
+		)
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		resp, err := c.Do(req)
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
 		if err == nil && resp.StatusCode == 200 {
 			body, err := io.ReadAll(resp.Body)
 			if err == nil {
 				t := Token{}
-				err := c.JSONDecoder(body, &t)
+				err := json.Unmarshal(body, &t)
 				if err == nil {
 					c.Token = &t
 				}
 			}
 		}
-	} else {
-		if !c.Token.IsValid() {
-			token, _ := c.RefreshToken()
-			c.Token = token
-		}
+
+		return c
+	}
+
+	if !c.Token.IsValid() {
+		token, _ := c.RefreshToken()
+		c.Token = token
 	}
 
 	return c
@@ -83,7 +99,7 @@ func (c *Client) RefreshToken() (*Token, error) {
 	resp, err := request(c, http.MethodPatch, "/token/refresh/", nil)
 	if err == nil {
 		token := Token{}
-		if decodeError := c.JSONDecoder(resp, &token); decodeError != nil {
+		if decodeError := json.Unmarshal(resp, &token); decodeError != nil {
 			return nil, decodeError
 		}
 		return &token, nil
@@ -97,7 +113,10 @@ func request(client *Client, method string, path string, payload io.Reader) ([]b
 		return nil, errors.New("unauthorized")
 	}
 
-	req, _ := http.NewRequest(method, client.BaseUrl+path, payload)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	req, _ := http.NewRequestWithContext(ctx, method, client.BaseUrl+path, payload)
 	req.Header.Set("Accept", "application/json")
 	if client.Token != nil && client.Token.IsValid() && path != "/token/" {
 		req.Header.Set("Authorization", "Bearer "+client.Token.AccessToken)
@@ -106,7 +125,9 @@ func request(client *Client, method string, path string, payload io.Reader) ([]b
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	switch resp.StatusCode {
 	case http.StatusBadRequest:
@@ -146,11 +167,9 @@ func NewClient(userName string, password string) *Client {
 		Client: &http.Client{
 			Timeout: time.Second * 5,
 		},
-		JSONEncoder: sonic.Marshal,
-		JSONDecoder: sonic.Unmarshal,
-		BaseUrl:     BaseUrl,
-		userName:    userName,
-		password:    password,
+		BaseUrl:  BaseUrl,
+		userName: userName,
+		password: password,
 	}
 }
 
@@ -160,9 +179,7 @@ func NewClientWithToken(token *Token) *Client {
 		Client: &http.Client{
 			Timeout: time.Second * 5,
 		},
-		JSONEncoder: sonic.Marshal,
-		JSONDecoder: sonic.Unmarshal,
-		BaseUrl:     BaseUrl,
-		Token:       token,
+		BaseUrl: BaseUrl,
+		Token:   token,
 	}
 }

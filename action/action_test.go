@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	rx "github.com/pixel365/goreydenx"
 	m "github.com/pixel365/goreydenx/model"
 )
@@ -17,8 +19,11 @@ func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func TestActions(t *testing.T) {
+	token := &rx.Token{AccessToken: "token", ExpiresIn: "2030-01-01T00:00:00Z"}
+
+	//nolint: lll
 	data := "{\"request_id\":\"string\",\"order_id\":0,\"action\":\"string\",\"value\":0,\"task\":{\"id\":\"string\",\"url\":\"string\",\"expires_at\":\"2023-09-05T05:45:26.018Z\"}}"
-	client := rx.NewClient("", "")
+	client := rx.NewClientWithToken(token)
 	client.Transport = RoundTripFunc(func(req *http.Request) *http.Response {
 		return &http.Response{
 			StatusCode: 200,
@@ -26,64 +31,43 @@ func TestActions(t *testing.T) {
 			Header:     make(http.Header),
 		}
 	})
-	client.Token = &rx.Token{
-		AccessToken: "fake token",
-		ExpiresIn:   "fake date",
-	}
 
 	_, err := Run(client, 123)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	_, err = Stop(client, 123)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	_, err = Cancel(client, 123)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	_, err = ChangeOnline(client, 123, 100)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	_, err = ChangeIncreaseValue(client, 123, 100)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	_, err = IncreaseOn(client, 123, 100)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	_, err = IncreaseOff(client, 123)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	_, err = AddViews(client, 123, 100)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 
 	launchParameters := &m.LaunchParameters{
 		LaunchMode: rx.LaunchModeDelay,
 		DelayTime:  10,
 	}
 	_, err = ChangeLaunchMode(client, 123, launchParameters)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 }
 
 func TestTaskStatus(t *testing.T) {
+	token := &rx.Token{AccessToken: "token", ExpiresIn: "2030-01-01T00:00:00Z"}
 	data := "{\"status\":\"pending\"}"
-	client := rx.NewClient("", "")
+	client := rx.NewClientWithToken(token)
 	client.Transport = RoundTripFunc(func(req *http.Request) *http.Response {
 		return &http.Response{
 			StatusCode: 200,
@@ -91,13 +75,7 @@ func TestTaskStatus(t *testing.T) {
 			Header:     make(http.Header),
 		}
 	})
-	client.Token = &rx.Token{
-		AccessToken: "fake token",
-		ExpiresIn:   "fake date",
-	}
 
 	_, err := TaskStatus(client, 123, "TaskID")
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err)
 }
